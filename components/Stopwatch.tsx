@@ -18,6 +18,8 @@ export default function Stopwatch({ title = "Stopwatch", tickFrequency = 100, ..
 	const [time, setTime] = useState({ msSoFar: 0, currentMs: 0 });
 	const [lapTimes, setLapTimes] = useState<string[]>([]);
 
+	const winDims = useWindowDimensions();
+
 	const startStop = () => {
 		// Start timer
 		if (!interval) {
@@ -27,7 +29,7 @@ export default function Stopwatch({ title = "Stopwatch", tickFrequency = 100, ..
 			const newInterval = setInterval(() => {
 				// console.log("msSoFar", msSoFar, "+ Date.now()", Date.now(), "- startTime", startTime )
 
-                let sTime = startTime.current || Date.now();
+				let sTime = startTime.current || Date.now();
 
 				setTime(Object.assign({}, time, { currentMs: time.msSoFar + Date.now() - sTime }));
 			}, tickFrequency);
@@ -53,8 +55,7 @@ export default function Stopwatch({ title = "Stopwatch", tickFrequency = 100, ..
 		setLapTimes([]);
 	};
 
-	// Not really necessary to memoize this function definition but good for demo purposes.
-	const grabLapTime = useCallback(() => {
+	const grabCurrentTime = () => {
 		var currLapTimes = [...lapTimes];
 
 		var newTime = getDisplayTime();
@@ -64,8 +65,8 @@ export default function Stopwatch({ title = "Stopwatch", tickFrequency = 100, ..
 			setLapTimes(currLapTimes);
 		}
 
-		console.log("[grabLapTime], lap times:", currLapTimes);
-	}, [lapTimes, time]);
+		console.log("[grabCurrentTime], lap times:", currLapTimes);
+	};
 
 	function getSeconds(): number {
 		return Math.floor((time.currentMs % 60000) / 1000);
@@ -90,30 +91,21 @@ export default function Stopwatch({ title = "Stopwatch", tickFrequency = 100, ..
 		return displayTime;
 	}
 
-	const isPortrait = useCallback(() => {
-        console.log("[isPortrait]")
-        const dims = useWindowDimensions();
-		// const width = useWindowDimensions().width;
-        // const height = useWindowDimensions().height;
-        const {width, height} = dims;
-        // const width = dims.width;
-        // const height = dims.height;
-        //const height = 400;
-        return height > width;
-	},[useCallback()]);
-
 	const percentOfSecond = Math.round((getSeconds() / 60) * 100);
 
 	return (
-		<ImageBackground source={require("../assets/bg2.png")} style={isPortrait() ? styles.stopwatch : styles.stopwatchLand}>
+		<ImageBackground
+			source={require("../assets/bg2.png")}
+			style={winDims.height > winDims.width ? styles.stopwatch : styles.stopwatchLand}
+		>
 			<Progress percent={percentOfSecond} />
 			<Text style={styles.header}>{title}</Text>
 
 			<Text style={styles.timeText}>{getDisplayTime()}</Text>
 
 			<View>
-                <Button text={interval ? "Pause" : "Start"} pressHandler={startStop} />
-                <Button text="Lap" pressHandler={grabLapTime} />
+				<Button text={interval ? "Pause" : "Start"} pressHandler={startStop} />
+				<Button text="Lap" pressHandler={grabCurrentTime} />
 			</View>
 
 			{useMemo(() => {
@@ -128,26 +120,26 @@ export default function Stopwatch({ title = "Stopwatch", tickFrequency = 100, ..
 const styles = StyleSheet.create({
 	stopwatch: {
 		flex: 1,
-        justifyContent: "space-between",
-        resizeMode: "cover",
+		justifyContent: "space-between",
+		resizeMode: "cover",
 		paddingTop: 60,
 		paddingRight: 20,
 		paddingBottom: 30,
 		paddingLeft: 20,
 	},
 	stopwatchLand: {
-        flex: 1,
-        resizeMode: "cover",
+		flex: 1,
+		resizeMode: "cover",
 		paddingTop: 20,
 		paddingRight: 30,
 		paddingBottom: 20,
-		paddingLeft: 30
+		paddingLeft: 30,
 	},
 	header: {
 		fontSize: 40,
 		textAlign: "center",
-        textTransform: "uppercase",
-        fontWeight: "bold"
+		textTransform: "uppercase",
+		fontWeight: "bold",
 	},
 	timeText: {
 		textAlign: "center",
