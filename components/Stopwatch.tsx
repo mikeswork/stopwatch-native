@@ -61,7 +61,7 @@ export default function Stopwatch({ title = "Stopwatch", tickFrequency = 100, ..
 		var newTime = getDisplayTime();
 		// Only capture lap time if it's not 0 and hasn't already been captured
 		if (currLapTimes[currLapTimes.length - 1] !== newTime && time.currentMs !== 0) {
-			currLapTimes.push(newTime);
+			currLapTimes.unshift(newTime);
 			setLapTimes(currLapTimes);
 		}
 
@@ -91,44 +91,49 @@ export default function Stopwatch({ title = "Stopwatch", tickFrequency = 100, ..
 		return displayTime;
 	}
 
-	const percentOfSecond = Math.round((getSeconds() / 60) * 100);
+    const percentOfSecond = Math.round((getSeconds() / 60) * 100);
+    
+    const isLandscape = winDims.height < winDims.width;
 
 	return (
 		<ImageBackground
 			source={require("../assets/bg2.png")}
-			style={winDims.height > winDims.width ? styles.stopwatch : styles.stopwatchLand}
+			style={[styles.stopwatch, isLandscape && styles.stopwatchLand]}
 		>
-			<Progress percent={percentOfSecond} />
-			<Text style={styles.header}>{title}</Text>
+            <View style={[styles.header, isLandscape && styles.headerLand]}>
+                <Text style={[styles.headerText, isLandscape && styles.headerTextLand]}>{title}</Text>
+            </View>
 
-			<Text style={styles.timeText}>{getDisplayTime()}</Text>
+            <View style={[styles.content, isLandscape && styles.contentLand]}>
+                <Progress percent={percentOfSecond} />
 
-			<View>
-				<Button text={interval ? "Pause" : "Start"} pressHandler={startStop} />
-				<Button text="Lap" pressHandler={grabCurrentTime} />
-			</View>
+                <Text style={styles.timeText}>{getDisplayTime()}</Text>
+                
+                <View style={[styles.buttons, isLandscape && styles.buttonsLand]}>
+                    <Button text={interval ? "Pause" : "Start"} pressHandler={startStop} />
+                    <Button text="Lap" pressHandler={grabCurrentTime} />
+                </View>
 
-			{useMemo(() => {
-				return <TimeList times={lapTimes} />;
-			}, [lapTimes])}
+                {useMemo(() => {
+                    return <TimeList times={lapTimes} />;
+                }, [lapTimes])}
 
-			<Button text="Reset" pressHandler={reset} fontSize={12} />
+                <Button text="Reset" pressHandler={reset} fontSize={12} />
+            </View>
 		</ImageBackground>
 	);
 }
 
 const styles = StyleSheet.create({
-	stopwatch: {
+    stopwatch: {
 		flex: 1,
-		justifyContent: "space-between",
-		resizeMode: "cover",
-		paddingTop: 60,
-		paddingRight: 20,
-		paddingBottom: 30,
-		paddingLeft: 20,
+		justifyContent: "flex-end",
+        resizeMode: "cover"
 	},
 	stopwatchLand: {
-		flex: 1,
+        flex: 1,
+        flexDirection: "row",
+        justifyContent: "flex-end",
 		resizeMode: "cover",
 		paddingTop: 20,
 		paddingRight: 30,
@@ -136,13 +141,68 @@ const styles = StyleSheet.create({
 		paddingLeft: 30,
 	},
 	header: {
-		fontSize: 40,
+        position: "absolute",
+        justifyContent: "flex-end",
+        top: 0,
+        right: 0,
+        bottom: "83%",
+        left: 0,
+        zIndex: 1,
+		backgroundColor: "#ffffff40",
+    },
+    headerLand: {
+        position: "absolute",
+        justifyContent: "center",
+        top: "40%",
+        right: 0,
+        bottom: "40%",
+        left: "-92%",
+        backgroundColor: "#ffffff25",
+        zIndex: 1,
+        
+        transform: [{ rotate: "-90deg" }]
+    },
+    headerText: {
+        marginBottom: 10,
+        fontSize: 34,
 		textAlign: "center",
 		textTransform: "uppercase",
-		fontWeight: "bold",
-	},
-	timeText: {
+        fontWeight: "normal",
+        letterSpacing: 10, 
+        color: "#111"
+    },
+    headerTextLand: {
+        fontSize: 40,
 		textAlign: "center",
-		fontSize: 60,
-	},
-});
+		textTransform: "uppercase",
+        fontWeight: "bold",
+    },
+    content: {
+        flex: 1,
+        maxHeight: "83%",
+        justifyContent: "space-between",
+        flexDirection: "column",
+        paddingTop: 20,
+		paddingRight: 20,
+		paddingBottom: 20,
+        paddingLeft: 20
+    },
+    contentLand: {
+        flex: 1,
+        maxWidth: "90%",
+        backgroundColor: "blue",
+        flexDirection: "row"
+    },
+	timeText: {
+        marginTop: 15,
+		textAlign: "center",
+        fontSize: 60
+    },
+    buttons: {
+        flex: 0,
+        justifyContent: "flex-start"
+    },
+    buttonsLand: {
+        flex: 1
+    }
+})

@@ -21,13 +21,13 @@ export default function Button({ text, pressHandler, fontSize = 18 }: ButtonProp
 
 const styles = StyleSheet.create({
 	button: {
-		marginTop: 15,
-		marginBottom: 15,
+		marginTop: 10,
+		marginBottom: 10,
 		paddingTop: 10,
 		paddingBottom: 10,
 		borderWidth: 2,
 		borderRadius: 10,
 		borderColor: "#00000050",
-		backgroundColor: "#ffffff50",
+		backgroundColor: "#cccccc99",
 	},
 });

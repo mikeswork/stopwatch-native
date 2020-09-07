@@ -25,7 +25,7 @@ export default function Progress({ percent }: ProgressProps) {
 					marginRight: 0,
 					marginBottom: markBottomMargin,
 					marginLeft: 0,
-					backgroundColor: "#FFFFFF22",
+					backgroundColor: "#FFFFFF11",
 				}}
 				key={uniqueId++}
 			></View>
