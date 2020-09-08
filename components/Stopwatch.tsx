@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef, useMemo } from "react";
+import React, { useState, useRef, useMemo } from "react";
 import { StyleSheet, Text, View, useWindowDimensions, ImageBackground } from "react-native";
 import TimeList from "./TimeList";
 import Progress from "./Progress";
@@ -12,12 +12,12 @@ interface StopwatchProps {
 export default function Stopwatch({ title = "Stopwatch", tickFrequency = 100, ...props }: StopwatchProps) {
 	console.log("[Stopwatch]");
 
-	const startTime = useRef<number>();
-
 	const [interval, intervalSet] = useState<number | null>(null);
-	const [time, setTime] = useState({ msSoFar: 0, currentMs: 0 });
+	const [time, setTime] = useState(0);
 	const [lapTimes, setLapTimes] = useState<string[]>([]);
 
+    const startTime = useRef<number>();
+    const timeBeforeStart = useRef<number>(0);
 	const winDims = useWindowDimensions();
 
 	const startStop = () => {
@@ -27,11 +27,8 @@ export default function Stopwatch({ title = "Stopwatch", tickFrequency = 100, ..
 
 			// Increment timer every tickFrequency
 			const newInterval = setInterval(() => {
-				// console.log("msSoFar", msSoFar, "+ Date.now()", Date.now(), "- startTime", startTime )
-
-				let sTime = startTime.current || Date.now();
-
-				setTime(Object.assign({}, time, { currentMs: time.msSoFar + Date.now() - sTime }));
+                const transpiredTime = Date.now() - (startTime.current || Date.now());
+                setTime(timeBeforeStart.current + transpiredTime);
 			}, tickFrequency);
 
 			intervalSet(newInterval);
@@ -39,9 +36,9 @@ export default function Stopwatch({ title = "Stopwatch", tickFrequency = 100, ..
         // Stop timer
 		} else {
 			clearInterval(interval);
-			intervalSet(null);
-			// console.log("msSoFar", msSoFar, "= currentMs", currentMs);
-			setTime(Object.assign({}, time, { msSoFar: time.currentMs }));
+            intervalSet(null);
+            
+			timeBeforeStart.current = time;
 		}
 	};
 
@@ -50,8 +47,8 @@ export default function Stopwatch({ title = "Stopwatch", tickFrequency = 100, ..
 		if (interval) startStop();
 
 		// Reset all timer data
-		intervalSet(null);
-		setTime({ msSoFar: 0, currentMs: 0 });
+		timeBeforeStart.current = 0;
+        setTime(0);
 		setLapTimes([]);
 	};
 
@@ -60,7 +57,7 @@ export default function Stopwatch({ title = "Stopwatch", tickFrequency = 100, ..
 
 		var newTime = getDisplayTime();
 		// Only capture lap time if it's not 0 and hasn't already been captured
-		if (currLapTimes[currLapTimes.length - 1] !== newTime && time.currentMs !== 0) {
+		if (currLapTimes[currLapTimes.length - 1] !== newTime && time !== 0) {
 			currLapTimes.unshift(newTime);
 			setLapTimes(currLapTimes);
 		}
@@ -69,18 +66,18 @@ export default function Stopwatch({ title = "Stopwatch", tickFrequency = 100, ..
 	};
 
 	function getSeconds(): number {
-		return Math.floor((time.currentMs % 60000) / 1000);
+		return Math.floor((time % 60000) / 1000);
 	}
 
 	// Get time of timer formatted MM:SS.T (T = Tenth of a second).
 	function getDisplayTime() {
 		// console.log("[getDisplayTime], current ms:", ms);
 
-		var minutes = Math.floor(time.currentMs / 60000);
-		var seconds = Math.floor((time.currentMs % 60000) / 1000);
+		var minutes = Math.floor(time / 60000);
+		var seconds = Math.floor((time % 60000) / 1000);
 
 		// i.e. the number of milliseconds transpired after the current second
-		var msBetweenSecs = time.currentMs - seconds * 1000 - minutes * 60 * 1000;
+		var msBetweenSecs = time - seconds * 1000 - minutes * 60 * 1000;
 		var secTenth = Math.floor(msBetweenSecs / 100);
 
 		var displayTime =
