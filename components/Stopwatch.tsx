@@ -10,14 +10,14 @@ interface StopwatchProps {
 }
 
 export default function Stopwatch({ title = "Stopwatch", tickFrequency = 100, ...props }: StopwatchProps) {
-	console.log("[Stopwatch]");
+	// console.log("[Stopwatch]");
 
 	const [interval, intervalSet] = useState<number | null>(null);
 	const [time, setTime] = useState(0);
 	const [lapTimes, setLapTimes] = useState<string[]>([]);
 
-    const startTime = useRef<number>();
-    const timeBeforeStart = useRef<number>(0);
+	const startTime = useRef<number>();
+	const timeBeforeStart = useRef<number>(0);
 	const winDims = useWindowDimensions();
 
 	const startStop = () => {
@@ -27,17 +27,17 @@ export default function Stopwatch({ title = "Stopwatch", tickFrequency = 100, ..
 
 			// Increment timer every tickFrequency
 			const newInterval = setInterval(() => {
-                const transpiredTime = Date.now() - (startTime.current || Date.now());
-                setTime(timeBeforeStart.current + transpiredTime);
+				const transpiredTime = Date.now() - (startTime.current || Date.now());
+				setTime(timeBeforeStart.current + transpiredTime);
 			}, tickFrequency);
 
 			intervalSet(newInterval);
 
-        // Stop timer
+			// Stop timer
 		} else {
 			clearInterval(interval);
-            intervalSet(null);
-            
+			intervalSet(null);
+
 			timeBeforeStart.current = time;
 		}
 	};
@@ -48,7 +48,7 @@ export default function Stopwatch({ title = "Stopwatch", tickFrequency = 100, ..
 
 		// Reset all timer data
 		timeBeforeStart.current = 0;
-        setTime(0);
+		setTime(0);
 		setLapTimes([]);
 	};
 
@@ -62,7 +62,7 @@ export default function Stopwatch({ title = "Stopwatch", tickFrequency = 100, ..
 			setLapTimes(currLapTimes);
 		}
 
-		console.log("[grabCurrentTime], lap times:", currLapTimes);
+		// console.log("[grabCurrentTime], lap times:", currLapTimes);
 	};
 
 	function getSeconds(): number {
@@ -88,118 +88,128 @@ export default function Stopwatch({ title = "Stopwatch", tickFrequency = 100, ..
 		return displayTime;
 	}
 
-    const percentOfSecond = Math.round((getSeconds() / 60) * 100);
-    
-    const isLandscape = winDims.height < winDims.width;
+	const percentOfSecond = Math.round((getSeconds() / 60) * 100);
+
+	const isLandscape = winDims.height < winDims.width;
+	const timeList = useMemo(() => {
+		return <TimeList times={lapTimes} isLandscape={isLandscape} />;
+	}, [lapTimes, isLandscape]);
 
 	return (
 		<ImageBackground
 			source={require("../assets/bg2.png")}
-			style={[styles.stopwatch, isLandscape && styles.stopwatchLand]}
+			style={[styles.imageBg, isLandscape && styles.imageBgLand]}
 		>
-            <View style={[styles.header, isLandscape && styles.headerLand]}>
-                <Text style={[styles.headerText, isLandscape && styles.headerTextLand]}>{title}</Text>
-            </View>
+			<View style={[styles.stopwatch, isLandscape && styles.stopwatchLand]}>
+				<Progress percent={percentOfSecond} isLandscape={isLandscape} />
 
-            <View style={[styles.content, isLandscape && styles.contentLand]}>
-                <Progress percent={percentOfSecond} />
+				<View style={[styles.header, isLandscape && styles.headerLand]}>
+					<Text style={styles.headerText}>{title}</Text>
+				</View>
 
-                <Text style={styles.timeText}>{getDisplayTime()}</Text>
-                
-                <View style={[styles.buttons, isLandscape && styles.buttonsLand]}>
-                    <Button text={interval ? "Pause" : "Start"} pressHandler={startStop} />
-                    <Button text="Lap" pressHandler={grabCurrentTime} />
-                </View>
+				<View style={[styles.content, isLandscape && styles.contentLand]}>
+					<View style={[styles.time, isLandscape && styles.timeLand]}>
+						<Text style={[styles.timeText, isLandscape && styles.timeTextLand]}>{getDisplayTime()}</Text>
 
-                {useMemo(() => {
-                    return <TimeList times={lapTimes} />;
-                }, [lapTimes])}
+						{isLandscape && timeList}
+					</View>
 
-                <Button text="Reset" pressHandler={reset} fontSize={12} />
-            </View>
+					<View style={[styles.buttons, isLandscape && styles.buttonsLand]}>
+						<Button text={interval ? "Pause" : "Start"} pressHandler={startStop} />
+						<Button text="Lap" pressHandler={grabCurrentTime} />
+
+						{!isLandscape && timeList}
+
+						<Button text="Reset" pressHandler={reset} fontSize={12} />
+					</View>
+				</View>
+			</View>
 		</ImageBackground>
 	);
 }
 
 const styles = StyleSheet.create({
-    stopwatch: {
+	imageBg: {
+		flex: 1,
+		resizeMode: "cover",
+	},
+	imageBgLand: {
+		justifyContent: "flex-start",
+		alignItems: "flex-end",
+	},
+	stopwatch: {
 		flex: 1,
 		justifyContent: "flex-end",
-        resizeMode: "cover"
 	},
 	stopwatchLand: {
-        flex: 1,
-        flexDirection: "row",
-        justifyContent: "flex-end",
-		resizeMode: "cover",
-		paddingTop: 20,
-		paddingRight: 30,
-		paddingBottom: 20,
-		paddingLeft: 30,
+		justifyContent: "center",
 	},
 	header: {
-        position: "absolute",
-        justifyContent: "flex-end",
-        top: 0,
-        right: 0,
-        bottom: "83%",
-        left: 0,
-        zIndex: 1,
+		position: "absolute",
+		justifyContent: "flex-end",
+		top: 0,
+		right: 0,
+		bottom: "83%",
+		left: 0,
+		zIndex: 1,
 		backgroundColor: "#ffffff40",
-    },
-    headerLand: {
-        position: "absolute",
-        justifyContent: "center",
-        top: "40%",
-        right: 0,
-        bottom: "40%",
-        left: "-92%",
-        backgroundColor: "#ffffff25",
-        zIndex: 1,
-        
-        transform: [{ rotate: "-90deg" }]
-    },
-    headerText: {
-        marginBottom: 10,
-        fontSize: 34,
+	},
+	headerLand: {
+		justifyContent: "flex-end",
+		top: 0,
+		right: 0,
+		bottom: 0,
+		left: "-144%",
+		backgroundColor: "#ffffff25",
+		transform: [{ rotate: "-90deg" }],
+	},
+	headerText: {
+		marginBottom: 10,
+		fontSize: 34,
 		textAlign: "center",
 		textTransform: "uppercase",
-        fontWeight: "normal",
-        letterSpacing: 10, 
-        color: "#111"
-    },
-    headerTextLand: {
-        fontSize: 40,
-		textAlign: "center",
-		textTransform: "uppercase",
-        fontWeight: "bold",
-    },
-    content: {
-        flex: 1,
-        maxHeight: "83%",
-        justifyContent: "space-between",
-        flexDirection: "column",
-        paddingTop: 20,
+		fontWeight: "normal",
+		letterSpacing: 10,
+		color: "#111",
+	},
+	content: {
+		flex: 1,
+		maxHeight: "83%",
+		justifyContent: "space-between",
+		flexDirection: "column",
+		paddingTop: 20,
 		paddingRight: 20,
 		paddingBottom: 20,
-        paddingLeft: 20
-    },
-    contentLand: {
-        flex: 1,
-        maxWidth: "90%",
-        backgroundColor: "blue",
-        flexDirection: "row"
-    },
+		paddingLeft: 20,
+	},
+	contentLand: {
+        maxWidth: "83%",
+        maxHeight: "100%",
+		flexDirection: "row",
+		paddingLeft: 0,
+	},
+	time: {
+		flex: 1,
+		justifyContent: "center",
+	},
+	timeLand: {
+		flex: -1,
+		alignItems: "center",
+		justifyContent: "center",
+	},
+	buttons: {
+		flex: 2,
+		justifyContent: "space-between",
+	},
+	buttonsLand: {
+		flex: -1,
+		justifyContent: "space-evenly",
+	},
 	timeText: {
-        marginTop: 15,
 		textAlign: "center",
-        fontSize: 60
-    },
-    buttons: {
-        flex: 0,
-        justifyContent: "flex-start"
-    },
-    buttonsLand: {
-        flex: 1
-    }
-})
+		fontSize: 70,
+	},
+	timeTextLand: {
+		fontSize: 60,
+	}
+});

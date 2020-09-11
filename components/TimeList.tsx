@@ -3,56 +3,64 @@ import { StyleSheet, Text, View, ScrollView } from "react-native";
 
 interface TimeListProps {
 	times: string[];
+	isLandscape?: boolean;
 }
 
-export default function TimeList(props: TimeListProps) {
-    var uniqueId = 0;
-	// console.log("[TimeList]")
+export default function TimeList({ times, isLandscape = false }: TimeListProps) {
+	var uniqueId = 0;
+	console.log("[TimeList]")
 
 	return (
-        <ScrollView horizontal={true} style={[styles.lapScrollView, !props.times.length && styles.lapScrollViewEmpty]}>
-            <View style={styles.lapTimes}>
-                {props.times.map((lapTime: string, indx: number, theArray) => {
-                    return (
-                        <View key={uniqueId++}>
-                            <Text style={styles.text}>{`${theArray.length - indx}. ${lapTime}`}</Text>
-                        </View>
-                    );
-                })}
-            </View>
-        </ScrollView>
+		<ScrollView
+			horizontal={true}
+			style={[
+				styles.lapScrollView,
+				!times.length && styles.lapScrollViewEmpty,
+				isLandscape && styles.lapScrollViewLand,
+			]}
+		>
+			<View style={styles.lapTimes}>
+				{times.map((lapTime: string, indx: number) => {
+					return (
+						<View key={uniqueId++}>
+							<Text style={styles.text}>{`${times.length - indx}. ${lapTime}`}</Text>
+						</View>
+					);
+				})}
+			</View>
+		</ScrollView>
 	);
 }
 
 const styles = StyleSheet.create({
-    lapScrollView: {
-        minHeight: "19%",
-        maxHeight: "19%",
-        padding: 5,
-        backgroundColor: "#00000060",
-		borderRadius: 10
-    },
-    lapScrollViewEmpty: {
-        minHeight: "19%",
-        maxHeight: "19%",
-        backgroundColor: "#00000020",
-		borderRadius: 10
-    },
+	lapScrollView: {
+		minHeight: "29%",
+		maxHeight: "29%",
+		padding: 5,
+		backgroundColor: "#ffffff40",
+		borderRadius: 10,
+	},
+	lapScrollViewEmpty: {
+		backgroundColor: "#ffffff10",
+	},
+	lapScrollViewLand: {
+		minHeight: "40%",
+		maxHeight: "40%",
+		minWidth: "77%",
+		maxWidth: "77%",
+		marginTop: 20,
+	},
 	lapTimes: {
-        flex: 0,
-        justifyContent: "center",
-        flexWrap: "wrap",
-        padding: 2
-    },
-    lapTimesEmpty: {
-        minHeight: "19%",
-        backgroundColor: "#00000020"
-    },
+		flex: 0,
+		justifyContent: "center",
+		flexWrap: "wrap",
+		padding: 2,
+	},
 	text: {
-        color: "#aaa",
-        marginTop: 2,
-        marginRight: 14,
-        marginBottom: 2,
-        marginLeft: 14
+		color: "#000",
+		marginTop: 2,
+		marginRight: 14,
+		marginBottom: 2,
+		marginLeft: 14,
 	},
 });
